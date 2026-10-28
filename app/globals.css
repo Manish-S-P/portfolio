@@ -1,26 +1,147 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-red: #c8232c;
+  --color-yellow: #ffd23f;
+  --color-cream: #fff3d6;
+  --color-ink: #1b1512;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --shadow-h2: 0 2px 0 var(--color-ink);
+  --shadow-h4: 0 4px 0 var(--color-ink);
+  --shadow-h5: 0 5px 0 var(--color-ink);
+  --shadow-h6: 0 6px 0 var(--color-ink);
+  --shadow-h7: 0 7px 0 var(--color-ink);
+  --shadow-h8: 0 8px 0 var(--color-ink);
+  --shadow-h11: 0 11px 0 var(--color-ink);
+  --shadow-h14: 0 14px 0 var(--color-ink);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  --ease-spring: cubic-bezier(0.3, 1.5, 0.5, 1);
+  --ease-bounce: cubic-bezier(0.3, 1.4, 0.5, 1);
+
+  --animate-pop: pop 0.7s cubic-bezier(0.3, 1.4, 0.5, 1) both;
+  --animate-up: up 0.8s both;
+  --animate-fi: fi 1s both;
+  --animate-bar: bar 2s 0.2s cubic-bezier(0.5, 0, 0.2, 1) both;
+  --animate-lift: lift 2.9s cubic-bezier(0.8, 0, 0.2, 1) forwards;
+  --animate-gone: gone 2.9s steps(1) forwards;
+  --animate-caret: caret 1s steps(1) infinite;
+  --animate-marquee: marq 26s linear infinite;
+  --animate-float: float 5s ease-in-out infinite;
+  --animate-spin-slow: spin 12s linear infinite;
+  --animate-rock: rock 1.6s ease-in-out infinite;
+  --animate-stick: stick 0.6s both;
+
+  @keyframes pop {
+    0% { opacity: 0; transform: translateY(60%) scale(0.6) rotate(-8deg); }
+    70% { opacity: 1; transform: translateY(-6%) scale(1.06) rotate(2deg); }
+    100% { opacity: 1; transform: none; }
+  }
+  @keyframes up {
+    from { opacity: 0; transform: translateY(24px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fi {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+  @keyframes bar {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
+  @keyframes lift {
+    0%, 78% { transform: translateY(0); }
+    100% { transform: translateY(-100%); }
+  }
+  @keyframes gone {
+    0%, 99% { visibility: visible; }
+    100% { visibility: hidden; }
+  }
+  @keyframes caret {
+    0%, 45% { opacity: 1; }
+    50%, 95% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes marq {
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); }
+  }
+  @keyframes float {
+    0%, 100% { margin-top: 0; }
+    50% { margin-top: -10px; }
+  }
+  @keyframes rock {
+    0%, 100% { transform: rotate(-5deg); }
+    50% { transform: rotate(5deg) translateY(-2px); }
+  }
+  @keyframes stick {
+    0% { opacity: 0; transform: scale(1.6) rotate(-20deg); }
+    65% { opacity: 1; transform: scale(0.92); }
+    100% { opacity: 1; }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@theme inline {
+  --font-display: var(--font-bowlby), sans-serif;
+  --font-sans: var(--font-instrument), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), monospace;
+}
+
+/* Mono label: 12px uppercase, wide tracking */
+@utility label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+@utility gutter {
+  padding-inline: clamp(18px, 4vw, 48px);
+}
+
+@utility section-title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: clamp(40px, 6.4vw, 92px);
+  line-height: 0.95;
+}
+
+@layer base {
+  html,
+  body {
+    background: var(--color-red);
+  }
+  html {
+    scroll-padding-top: 90px;
+  }
+  body {
+    color: var(--color-cream);
+    font-size: 18px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  body,
+  button,
+  a {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Cpath d='M6 6L16 16M16 6L6 16' stroke='%231B1512' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E") 11 11, auto;
+  }
+  a:hover,
+  button:hover,
+  [data-clickable]:hover {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='26' height='26'%3E%3Ccircle cx='13' cy='13' r='10' fill='%23FFD23F' stroke='%231B1512' stroke-width='2.5'/%3E%3Cpath d='M9.5 9.5L16.5 16.5M16.5 9.5L9.5 16.5' stroke='%231B1512' stroke-width='2.5' stroke-linecap='round'/%3E%3C/svg%3E") 13 13, pointer;
+  }
+  :focus-visible {
+    outline: 3px solid var(--color-ink);
+    outline-offset: 3px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
 }
