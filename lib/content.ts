@@ -87,18 +87,32 @@ export const PROJECTS: Project[] = [
     bg: "#FFF3D6",
     fg: "#1B1512",
     blurb:
-      "Secure file sharing on a Java and Spring Boot REST backend, with scheduled expiry, per-upload size limits and BCrypt credentials.",
-    stack: ["Java", "Spring Boot", "React"],
+      "No-signup file sharing behind a title and a password. Files travel straight from the browser to Cloudflare R2 and delete themselves when the stash expires.",
+    stack: ["React", "FastAPI", "MongoDB", "Cloudflare R2", "Docker"],
     proofs: [{ k: "Repo", href: GITHUB }],
   },
 ];
+
+export type Decision = { k: string; chose: string; over: string; why: string };
+
+/** Every field after `k` is optional and renders in this order. */
+export type CaseSection = {
+  k: string;
+  v?: string;
+  /** Path under /public plus its intrinsic size. */
+  image?: { src: string; alt: string; width: number; height: number };
+  points?: { k?: string; v: string }[];
+  numbered?: boolean;
+  decisions?: Decision[];
+  outro?: string;
+};
 
 export type CaseStudy = {
   title: string;
   year: string;
   sub: string;
   meta: { k: string; v: string }[];
-  body: { k: string; v: string }[];
+  body: CaseSection[];
   proofs: Link[];
   next: string;
 };
@@ -140,28 +154,119 @@ export const CASES: Record<string, CaseStudy> = {
     ],
     next: "stashit",
   },
+  // TODO: Results section (real numbers only), screenshots and live site link after launch
   stashit: {
     title: "StashIt",
     year: "2026",
-    sub: "A secure file-sharing platform with automated expiry, built on a Java and Spring Boot REST backend.",
+    sub: "Password-protected file sharing with no sign-up. Pick a title and a password, drop in up to 100 MB of files, and anyone who knows both can open the stash until it expires.",
     meta: [
-      { k: "Role", v: "Backend & frontend" },
-      { k: "Status", v: "In progress" },
-      { k: "Stack", v: "Java, Spring Boot, React" },
-      { k: "Security", v: "BCrypt" },
+      { k: "Role", v: "Solo: design, backend, frontend, deploy" },
+      { k: "Stack", v: "React, FastAPI, MongoDB, Cloudflare R2, Docker" },
+      { k: "Type", v: "Full-stack web app" },
+      { k: "Status", v: "v1 in development" },
     ],
     body: [
       {
-        k: "Backend",
-        v: "Designing and building a Java/Spring Boot REST backend with a React frontend, applying OOP principles and clean class design for space and file management.",
+        k: "The problem",
+        v: "Getting a file onto a device you don’t own usually means signing in somewhere you’d rather stay out of. As a student I hit this constantly: a college lab PC, a friend’s laptop, the computer at a print shop. Every usual route carries a cost.",
+        points: [
+          { v: "Email and Google Drive ask you to sign in on a shared machine and remember to sign out." },
+          { v: "WhatsApp Web asks you to scan a QR code with your phone on someone else’s computer." },
+          { v: "Pen drives get lost, carry viruses and are banned in some labs." },
+          { v: "Public upload sites hand you long random links that are painful to type on another device." },
+        ],
+        outro:
+          "dontpad already solves this for text: type a name and a shared page appears, no account needed. StashIt brings that idea to files and puts a password in front of them.",
       },
       {
-        k: "File expiry",
-        v: "Implementing a scheduled background job to automate file expiry and cleanup, handling concurrent access safely.",
+        k: "Goals",
+        numbered: true,
+        points: [
+          { v: "Share files by remembering two things: a title and a password." },
+          { v: "Skip accounts and sign-up entirely, on any browser." },
+          { v: "Delete files automatically, so nothing sensitive lingers." },
+          { v: "Hold up on the public internet as a real, deployed product." },
+        ],
       },
       {
-        k: "Security",
-        v: "Enforcing configurable per-upload size limits and BCrypt-based credential security, following standard coding and quality practices.",
+        k: "Constraints",
+        points: [
+          { v: "One developer on a student budget, so hosting has to stay cheap." },
+          { v: "An anonymous public upload site invites abuse and password guessing, so security shaped the design from the first line of code." },
+          { v: "Uploads of up to 100 MB must leave the backend fast and stable." },
+        ],
+      },
+      {
+        k: "The solution",
+        v: "The whole flow lives in one form: enter a title and a password, then create or open a stash.",
+        numbered: true,
+        points: [
+          { k: "Create", v: "Pick a unique title and a password. A taken title gets flagged right away." },
+          { k: "Fill", v: "Drag in files up to 100 MB in total, choose a lifetime from 1 hour to 7 days, and optionally switch on burn after read." },
+          { k: "Share", v: "Tell the other person the title and password, or type them yourself on another device." },
+          { k: "Open", v: "Anyone with the credentials can download, add or delete files and extend the expiry." },
+          { k: "Disappear", v: "Everything is deleted when the timer runs out, or right after the first download for a burn stash." },
+        ],
+      },
+      {
+        k: "Architecture",
+        image: { src: "/stashit-architecture.svg", alt: "StashIt system architecture: the browser sends JSON to a FastAPI backend and uploads file bytes directly to Cloudflare R2", width: 760, height: 448 },
+        v: "The browser sends small JSON requests to the FastAPI backend, which checks rate limits, verifies the password and returns presigned URLs. File bytes then travel straight between the browser and Cloudflare R2. MongoDB keeps one document per stash, and a scheduled cleanup job clears expired files out of R2.",
+      },
+      {
+        k: "Key design decisions",
+        decisions: [
+          { k: "Where files live", chose: "Object storage on Cloudflare R2", over: "Server disk or the database", why: "Scales without filling the server and charges no egress fees, which suits a download-heavy app." },
+          { k: "How files move", chose: "Presigned URLs, browser to R2 directly", over: "Uploading through the backend", why: "The API handles only small JSON, so it stays fast and cheap to run." },
+          { k: "Database", chose: "MongoDB, one document per stash", over: "A relational schema", why: "A stash and its files are read and written together, and a TTL index handles expiry natively." },
+          { k: "Backend", chose: "FastAPI", over: "Spring Boot, Express", why: "Async I/O, built-in request validation and auto-generated API docs." },
+          { k: "Title identity", chose: "Unique titles for v1", over: "Title + password as a combined key", why: "Simpler to build and to explain. The combined key is planned for v2." },
+          { k: "Password storage", chose: "Argon2 hashes", over: "Plain text or fast hashes like SHA-256", why: "Deliberately slow to compute, which makes a leaked database expensive to crack." },
+          { k: "Sessions", chose: "Short-lived token scoped to one stash", over: "Sending the password on every request", why: "The password crosses the network once per visit." },
+        ],
+      },
+      {
+        k: "Technical challenges",
+        numbered: true,
+        points: [
+          {
+            k: "Enforcing 100 MB when files skip the backend",
+            v: "Uploads go straight to R2, so the API has no request body to measure. A three-point check covers it: space is reserved atomically before upload, the presigned URL rejects anything larger than declared, and the real size is verified afterwards. Unconfirmed reservations are released.",
+          },
+          {
+            k: "Expiring data in two places",
+            v: "MongoDB’s TTL index deletes stash documents on its own, with up to a minute of lag, and it has no view of R2. Every request also checks expires_at, a scheduled job deletes expired files, and an R2 lifecycle rule acts as a safety net.",
+          },
+          {
+            k: "Race conditions in shared editing",
+            v: "Two visitors can upload or delete at the same moment. MongoDB’s atomic operators ($push, $pull, and $inc with a conditional filter) change the file list and size counter in a single step, which keeps both correct under concurrent writes.",
+          },
+          {
+            k: "Burn after read with a working download",
+            v: "The first download atomically marks the stash as consumed. That locks everyone else out and gives the downloader a 10-minute window to finish before the files are deleted.",
+          },
+          {
+            k: "Brute-force guessing on an anonymous site",
+            v: "Passwords are hashed with Argon2, and attempts are rate-limited per stash and per IP, with a cooldown after 5 failed tries.",
+          },
+        ],
+      },
+      {
+        k: "What I learned",
+        points: [
+          { v: "Design the data flow before writing code. Deciding where bytes travel shaped the whole architecture." },
+          { v: "Security for anonymous apps: password hashing, rate limiting, and size limits enforced on the server." },
+          { v: "Concurrency handled through atomic database operations, with no read-then-write steps." },
+          { v: "Shipping: Docker, environment secrets, CI, and running a real app on the public internet." },
+        ],
+      },
+      {
+        k: "Next, in v2",
+        points: [
+          { v: "Same title with different passwords as separate stashes, using a key derived from both." },
+          { v: "Encryption in the browser, so files stay unreadable to the server as well." },
+          { v: "Download all as ZIP, QR code sharing and file previews." },
+        ],
       },
     ],
     proofs: [{ k: "Repository", href: GITHUB }],

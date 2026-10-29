@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 448" width="760" height="448" role="img" aria-label="StashIt system architecture" font-family="Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif" font-size="13">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0L10 5L0 10z" fill="#1B1512"/>
+    </marker>
+  </defs>
+
+  <rect width="760" height="448" fill="#FFF3D6"/>
+
+  <text x="24" y="30" font-size="15" font-weight="600" fill="#1B1512">Only small JSON hits the API; file bytes go straight to R2</text>
+
+  <!-- Connectors -->
+  <g fill="none" stroke="#1B1512" stroke-width="1.75">
+    <path d="M224 92H278" marker-end="url(#arrow)"/>
+    <path d="M330 128V174" marker-end="url(#arrow)"/>
+    <path d="M480 92H636V174" marker-end="url(#arrow)"/>
+    <path d="M480 212H534" marker-end="url(#arrow)"/>
+    <path d="M260 304V350" marker-end="url(#arrow)"/>
+    <path d="M636 352V250" marker-end="url(#arrow)"/>
+    <path d="M536 388H362" marker-end="url(#arrow)"/>
+  </g>
+  <text x="566" y="84" text-anchor="middle" font-size="11.5" fill="#C8232C" font-weight="600">file bytes, direct</text>
+  <text x="338" y="156" font-size="11.5" fill="#C8232C" font-weight="600">JSON over HTTPS</text>
+
+  <!-- Vercel CDN -->
+  <rect x="24" y="56" width="200" height="72" rx="8" fill="#FFFFFF" stroke="#1B1512" stroke-width="2"/>
+  <text x="124" y="80" text-anchor="middle" font-weight="600" fill="#1B1512">Vercel CDN</text>
+  <text x="124" y="96" text-anchor="middle" font-size="11.5" fill="#5A4E47">Serves the React app</text>
+  <text x="124" y="112" text-anchor="middle" font-size="11.5" fill="#5A4E47">HTML, JS, CSS</text>
+
+  <!-- Browser -->
+  <rect x="280" y="56" width="200" height="72" rx="8" fill="#C8232C" fill-opacity="0.12" stroke="#C8232C" stroke-width="2.5"/>
+  <text x="380" y="80" text-anchor="middle" font-weight="600" fill="#1B1512">User's browser</text>
+  <text x="380" y="96" text-anchor="middle" font-size="11.5" fill="#5A4E47">React + TypeScript</text>
+  <text x="380" y="112" text-anchor="middle" font-size="11.5" fill="#5A4E47">Any device, no login</text>
+
+  <!-- Backend container -->
+  <rect x="24" y="176" width="456" height="128" rx="8" fill="#FFD23F" stroke="#1B1512" stroke-width="2"/>
+  <text x="40" y="200" font-weight="600" fill="#1B1512">FastAPI backend (Docker, Render)</text>
+
+  <rect x="40" y="216" width="130" height="72" rx="8" fill="#FFFFFF" stroke="#1B1512" stroke-width="2"/>
+  <text x="105" y="240" text-anchor="middle" font-weight="600" fill="#1B1512">Rate limiter</text>
+  <text x="105" y="256" text-anchor="middle" font-size="11.5" fill="#5A4E47">5 tries, cooldown</text>
+  <text x="105" y="272" text-anchor="middle" font-size="11.5" fill="#5A4E47">per IP and stash</text>
+
+  <rect x="186" y="216" width="130" height="72" rx="8" fill="#FFFFFF" stroke="#1B1512" stroke-width="2"/>
+  <text x="251" y="240" text-anchor="middle" font-weight="600" fill="#1B1512">Auth</text>
+  <text x="251" y="256" text-anchor="middle" font-size="11.5" fill="#5A4E47">Argon2 hashes</text>
+  <text x="251" y="272" text-anchor="middle" font-size="11.5" fill="#5A4E47">Signed tokens</text>
+
+  <rect x="332" y="216" width="130" height="72" rx="8" fill="#FFFFFF" stroke="#1B1512" stroke-width="2"/>
+  <text x="397" y="240" text-anchor="middle" font-weight="600" fill="#1B1512">Stash service</text>
+  <text x="397" y="256" text-anchor="middle" font-size="11.5" fill="#5A4E47">Files and limits</text>
+  <text x="397" y="272" text-anchor="middle" font-size="11.5" fill="#5A4E47">Presigned URLs</text>
+
+  <!-- Cloudflare R2 -->
+  <rect x="536" y="176" width="200" height="72" rx="8" fill="#FFFFFF" stroke="#1B1512" stroke-width="2"/>
+  <text x="636" y="200" text-anchor="middle" font-weight="600" fill="#1B1512">Cloudflare R2</text>
+  <text x="636" y="216" text-anchor="middle" font-size="11.5" fill="#5A4E47">Stores file bytes</text>
+  <text x="636" y="232" text-anchor="middle" font-size="11.5" fill="#5A4E47">Lifecycle rule backup</text>
+
+  <!-- MongoDB Atlas -->
+  <rect x="160" y="352" width="200" height="72" rx="8" fill="#FFFFFF" stroke="#1B1512" stroke-width="2"/>
+  <text x="260" y="376" text-anchor="middle" font-weight="600" fill="#1B1512">MongoDB Atlas</text>
+  <text x="260" y="392" text-anchor="middle" font-size="11.5" fill="#5A4E47">One document per stash</text>
+  <text x="260" y="408" text-anchor="middle" font-size="11.5" fill="#5A4E47">TTL index on expiry</text>
+
+  <!-- Cleanup job -->
+  <rect x="536" y="352" width="200" height="72" rx="8" fill="#FFFFFF" stroke="#1B1512" stroke-width="2"/>
+  <text x="636" y="376" text-anchor="middle" font-weight="600" fill="#1B1512">Cleanup job</text>
+  <text x="636" y="392" text-anchor="middle" font-size="11.5" fill="#5A4E47">Runs on a schedule</text>
+  <text x="636" y="408" text-anchor="middle" font-size="11.5" fill="#5A4E47">Removes expired files</text>
+</svg>

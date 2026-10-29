@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CASES } from "@/lib/content";
@@ -47,7 +48,47 @@ export default async function CaseStudyPage(props: PageProps<"/work/[slug]">) {
             <Reveal key={s.k} duration={0.7}>
               <section className="rounded-3xl border-3 border-ink bg-white p-[26px] shadow-h6">
                 <h2 className="mb-2.5 font-display text-2xl font-normal text-red">{s.k}</h2>
-                <p className="text-[17.5px] leading-[1.65] text-pretty">{s.v}</p>
+                {s.image && (
+                  <Image
+                    src={s.image.src}
+                    alt={s.image.alt}
+                    width={s.image.width}
+                    height={s.image.height}
+                    unoptimized
+                    className="mb-4 h-auto w-full rounded-2xl border-3 border-ink"
+                  />
+                )}
+                {s.v && <p className="text-[17.5px] leading-[1.65] text-pretty">{s.v}</p>}
+                {s.points && (
+                  <ol className={`grid gap-3 ${s.v ? "mt-4" : ""}`}>
+                    {s.points.map((p, i) => (
+                      <li key={i} className="flex gap-3 text-[17.5px] leading-[1.65] text-pretty">
+                        <span className="mt-[3px] shrink-0 font-mono text-xs leading-[1.65] font-bold text-red">
+                          {s.numbered ? String(i + 1).padStart(2, "0") : "●"}
+                        </span>
+                        <span>
+                          {p.k && <strong className="font-bold">{p.k}. </strong>}
+                          {p.v}
+                        </span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                {s.decisions && (
+                  <div className="mt-1 grid gap-3">
+                    {s.decisions.map((d) => (
+                      <div key={d.k} className="rounded-2xl border-3 border-ink bg-cream p-4">
+                        <p className="font-mono text-[11px] tracking-[.1em] text-red uppercase">{d.k}</p>
+                        <p className="mt-1.5 text-[17px] leading-snug">
+                          <span className="font-bold">{d.chose}</span>
+                          <span className="opacity-60"> over {d.over}</span>
+                        </p>
+                        <p className="mt-1.5 text-[16px] leading-[1.6] text-pretty">{d.why}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                {s.outro && <p className="mt-4 text-[17.5px] leading-[1.65] text-pretty">{s.outro}</p>}
               </section>
             </Reveal>
           ))}
